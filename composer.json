@@ -9,6 +9,7 @@
         "tourze/benifit-bundle": "0.0.*",
         "tourze/enum-extra": "~0.0.5",
         "tourze/symfony-async-bundle": "0.0.*",
+        "tourze/easy-admin-menu-bundle": "0.1.*",
         "tourze/easy-admin-attribute": "0.1.*",
         "tourze/doctrine-indexed-bundle": "0.0.*",
         "tourze/doctrine-snowflake-bundle": "0.1.*",
