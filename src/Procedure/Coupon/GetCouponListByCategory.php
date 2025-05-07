@@ -1,0 +1,86 @@
+<?php
+
+namespace CouponBundle\Procedure\Coupon;
+
+use Carbon\Carbon;
+use CouponBundle\Entity\Category;
+use CouponBundle\Repository\CategoryRepository;
+use CouponBundle\Repository\CouponRepository;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Tourze\DoctrineHelper\CacheHelper;
+use Tourze\JsonRPC\Core\Attribute\MethodDoc;
+use Tourze\JsonRPC\Core\Attribute\MethodExpose;
+use Tourze\JsonRPC\Core\Attribute\MethodParam;
+use Tourze\JsonRPC\Core\Attribute\MethodTag;
+use Tourze\JsonRPC\Core\Exception\ApiException;
+use Tourze\JsonRPC\Core\Model\JsonRpcRequest;
+use Tourze\JsonRPCCacheBundle\Procedure\CacheableProcedure;
+
+#[MethodTag('优惠券模块')]
+#[MethodDoc('通过分类获取优惠券')]
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[MethodExpose('GetCouponListByCategory')]
+class GetCouponListByCategory extends CacheableProcedure
+{
+    #[MethodParam('上级分类ID')]
+    public int $categoryId;
+
+    public function __construct(
+        private readonly CategoryRepository $categoryRepository,
+        private readonly CouponRepository $couponRepository,
+        private readonly Security $security,
+    ) {
+    }
+
+    public function execute(): array
+    {
+        $category = $this->categoryRepository->find($this->categoryId);
+        if (empty($category)) {
+            throw new ApiException('分类不存在');
+        }
+
+        $coupon = $this->couponRepository->findBy([
+            'category' => $category,
+        ]);
+
+        $list = [];
+        $now = Carbon::now();
+        foreach ($coupon as $item) {
+            if ($item->getEndTime()) {
+                if ($now->gt($item->getEndTime())) {
+                    continue;
+                }
+            }
+            if ($item->getStartTime()) {
+                if ($now->lt($item->getStartTime())) {
+                    continue;
+                }
+            }
+
+            $list[] = $item->retrieveApiArray();
+        }
+
+        return $list;
+    }
+
+    protected function getCacheKey(JsonRpcRequest $request): string
+    {
+        $key = static::buildParamCacheKey($request->getParams());
+        if ($this->security->getUser()) {
+            $key .= '-' . $this->security->getUser()->getUserIdentifier();
+        }
+
+        return $key;
+    }
+
+    protected function getCacheDuration(JsonRpcRequest $request): int
+    {
+        return MINUTE_IN_SECONDS;
+    }
+
+    protected function getCacheTags(JsonRpcRequest $request): iterable
+    {
+        yield CacheHelper::getClassTags(Category::class);
+    }
+}

@@ -1,0 +1,24 @@
+services:
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    public: true
+
+  CouponBundle\:
+    resource: '../../'
+    exclude:
+      - '../../DependencyInjection/'
+      - '../../Enum/'
+      - '../../Entity/'
+      - '../../Message/'
+      - '../../Model/'
+      - '../../Exception/'
+      - '../../Request/'
+      - '../../Resources/'
+      - '../../Tests/'
+
+  # 默认参数初始化一个实例
+  CouponCode\CouponCode:
+    autowire: true
+    public: true
