@@ -19,7 +19,6 @@ class CouponBundle extends Bundle implements BundleDependencyInterface
         return [
             \Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle::class => ['all' => true],
             \Tourze\DoctrineIndexedBundle\DoctrineIndexedBundle::class => ['all' => true],
-            \AntdCpBundle\AntdCpBundle::class => ['all' => true],
             \Tourze\Symfony\CronJob\CronJobBundle::class => ['all' => true],
         ];
     }
