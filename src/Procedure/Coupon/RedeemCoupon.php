@@ -6,6 +6,7 @@ use CouponBundle\Exception\CodeUsedException;
 use CouponBundle\Repository\CodeRepository;
 use CouponBundle\Service\CouponService;
 use HttpClientBundle\Exception\HttpClientException;
+use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
@@ -20,6 +21,7 @@ use Tourze\JsonRPCLogBundle\Attribute\Log;
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 #[MethodExpose('RedeemCoupon')]
 #[Log]
+#[WithMonologChannel('procedure')]
 class RedeemCoupon extends LockableProcedure
 {
     /**
@@ -40,7 +42,7 @@ class RedeemCoupon extends LockableProcedure
     public function __construct(
         private readonly CodeRepository $codeRepository,
         private readonly CouponService $codeService,
-        private readonly LoggerInterface $procedureLogger,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -60,12 +62,12 @@ class RedeemCoupon extends LockableProcedure
             } catch (CodeUsedException) {
                 $errorMessage = "{$code->getCoupon()->getName()}已被使用";
             } catch (HttpClientException $exception) {
-                $this->procedureLogger->error('远程核销失败', [
+                $this->logger->error('远程核销失败', [
                     'code' => $item,
                     'exception' => $exception,
                 ]);
             } catch (\Throwable $exception) {
-                $this->procedureLogger->error('核销失败', [
+                $this->logger->error('核销失败', [
                     'code' => $item,
                     'exception' => $exception,
                 ]);

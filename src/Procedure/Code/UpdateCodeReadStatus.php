@@ -5,6 +5,7 @@ namespace CouponBundle\Procedure\Code;
 use CouponBundle\Entity\ReadStatus;
 use CouponBundle\Repository\CodeRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -20,13 +21,14 @@ use Tourze\JsonRPCLogBundle\Attribute\Log;
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 #[MethodExpose('UpdateCodeReadStatus')]
 #[Log]
+#[WithMonologChannel('procedure')]
 class UpdateCodeReadStatus extends LockableProcedure
 {
     public function __construct(
         private readonly CodeRepository $codeRepository,
         private readonly DoctrineService $doctrineService,
         private readonly Security $security,
-        private readonly LoggerInterface $procedureLogger,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -46,7 +48,7 @@ class UpdateCodeReadStatus extends LockableProcedure
                 $readStatus->setCode($code);
                 $this->doctrineService->directInsert($readStatus);
             } catch (UniqueConstraintViolationException $exception) {
-                $this->procedureLogger->warning('更新券码被查看情况时发现重复数据', [
+                $this->logger->warning('更新券码被查看情况时发现重复数据', [
                     'code' => $code,
                     'exception' => $exception,
                 ]);
