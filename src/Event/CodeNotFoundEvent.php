@@ -2,8 +2,8 @@
 
 namespace CouponBundle\Event;
 
-use AppBundle\Entity\BizUser;
 use CouponBundle\Traits\CodeAware;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class CodeNotFoundEvent extends Event
@@ -16,9 +16,9 @@ class CodeNotFoundEvent extends Event
     private string $sn;
 
     /**
-     * @var BizUser 要查找的用户
+     * @var UserInterface 要查找的用户
      */
-    private BizUser $user;
+    private UserInterface $user;
 
     public function getSn(): string
     {
@@ -30,12 +30,12 @@ class CodeNotFoundEvent extends Event
         $this->sn = $sn;
     }
 
-    public function getUser(): BizUser
+    public function getUser(): UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(BizUser $user): void
+    public function setUser(UserInterface $user): void
     {
         $this->user = $user;
     }

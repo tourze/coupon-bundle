@@ -2,12 +2,12 @@
 
 namespace CouponBundle\Entity;
 
-use AppBundle\Entity\BizUser;
 use CouponBundle\Repository\SendPlanRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
@@ -90,7 +90,7 @@ class SendPlan implements \Stringable
     #[FormField(title: '发送优惠券')]
     private Collection $coupons;
 
-    #[ORM\ManyToMany(targetEntity: BizUser::class, fetch: 'EXTRA_LAZY')]
+    #[ORM\ManyToMany(targetEntity: UserInterface::class, fetch: 'EXTRA_LAZY')]
     #[ListColumn(title: '接收用户')]
     #[FormField(title: '接收用户')]
     private Collection $users;
@@ -200,14 +200,14 @@ class SendPlan implements \Stringable
     }
 
     /**
-     * @return Collection<int, BizUser>
+     * @return Collection<int, UserInterface>
      */
     public function getUsers(): Collection
     {
         return $this->users;
     }
 
-    public function addUser(BizUser $user): self
+    public function addUser(UserInterface $user): self
     {
         if (!$this->users->contains($user)) {
             $this->users->add($user);
@@ -216,7 +216,7 @@ class SendPlan implements \Stringable
         return $this;
     }
 
-    public function removeUser(BizUser $user): self
+    public function removeUser(UserInterface $user): self
     {
         $this->users->removeElement($user);
 

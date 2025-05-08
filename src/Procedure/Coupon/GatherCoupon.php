@@ -2,7 +2,6 @@
 
 namespace CouponBundle\Procedure\Coupon;
 
-use AppBundle\Entity\BizUser;
 use Carbon\Carbon;
 use CouponBundle\Exception\CouponRequirementException;
 use CouponBundle\Exception\PickCodeNotFoundException;

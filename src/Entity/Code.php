@@ -2,16 +2,13 @@
 
 namespace CouponBundle\Entity;
 
-use AntdCpBundle\Builder\Action\ModalFormAction;
-use AntdCpBundle\Builder\Field\InputNumberField;
-use AntdCpBundle\Service\FormFieldBuilder;
-use AppBundle\Entity\BizUser;
 use Carbon\Carbon;
 use CouponBundle\Enum\CodeStatus;
 use CouponBundle\Procedure\Coupon\AdminGenerateCouponCode;
 use CouponBundle\Repository\CodeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\Arrayable\AdminArrayInterface;
@@ -162,9 +159,9 @@ class Code implements \Stringable, AdminArrayInterface, ApiArrayInterface
 
     #[ListColumn(title: '拥有用户')]
     #[ExportColumn(title: '拥有用户')]
-    #[ORM\ManyToOne(targetEntity: BizUser::class, fetch: 'EXTRA_LAZY')]
+    #[ORM\ManyToOne(targetEntity: UserInterface::class, fetch: 'EXTRA_LAZY')]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
-    private ?BizUser $owner = null;
+    private ?UserInterface $owner = null;
 
     /**
      * 保留字段，用于后续实现单优惠券多次核销的逻辑.
@@ -279,12 +276,12 @@ class Code implements \Stringable, AdminArrayInterface, ApiArrayInterface
         return $this;
     }
 
-    public function getOwner(): ?BizUser
+    public function getOwner(): ?UserInterface
     {
         return $this->owner;
     }
 
-    public function setOwner(?BizUser $owner): self
+    public function setOwner(?UserInterface $owner): self
     {
         $this->owner = $owner;
 

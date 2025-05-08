@@ -2,23 +2,22 @@
 
 namespace CouponBundle\Event;
 
-use AppBundle\Entity\BizUser;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class BeforeGetUserCouponListEvent extends Event
 {
     /**
-     * @var BizUser|UserInterface 要查找的用户
+     * @var UserInterface 要查找的用户
      */
-    private BizUser|UserInterface $user;
+    private UserInterface $user;
 
-    public function getUser(): BizUser|UserInterface
+    public function getUser(): UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(BizUser|UserInterface $user): void
+    public function setUser(UserInterface $user): void
     {
         $this->user = $user;
     }
