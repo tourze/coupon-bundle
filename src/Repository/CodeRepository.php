@@ -11,7 +11,6 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use DoctrineEnhanceBundle\Repository\CommonRepositoryAware;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -23,7 +22,6 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 class CodeRepository extends ServiceEntityRepository
 {
-    use CommonRepositoryAware;
 
     public function __construct(
         ManagerRegistry $registry,
