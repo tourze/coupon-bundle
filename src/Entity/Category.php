@@ -10,7 +10,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use DoctrineEnhanceBundle\Traits\SortableTrait;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\Arrayable\AdminArrayInterface;
@@ -80,7 +79,34 @@ class Category implements \Stringable, Itemable, AdminArrayInterface
     {
         return $this->updateTime;
     }
-    use SortableTrait;
+
+    /**
+     * order值大的排序靠前。有效的值范围是[0, 2^32].
+     */
+    #[IndexColumn]
+    #[FormField]
+    #[ListColumn(order: 95, sorter: true)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['default' => '0', 'comment' => '次序值'])]
+    private ?int $sortNumber = 0;
+
+    public function getSortNumber(): ?int
+    {
+        return $this->sortNumber;
+    }
+
+    public function setSortNumber(?int $sortNumber): self
+    {
+        $this->sortNumber = $sortNumber;
+
+        return $this;
+    }
+
+    public function retrieveSortableArray(): array
+    {
+        return [
+            'sortNumber' => $this->getSortNumber(),
+        ];
+    }
 
     #[ListColumn(order: -1)]
     #[ExportColumn]
