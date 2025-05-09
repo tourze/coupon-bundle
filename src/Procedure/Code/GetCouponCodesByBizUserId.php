@@ -2,10 +2,10 @@
 
 namespace CouponBundle\Procedure\Code;
 
-use AppBundle\Repository\BizUserRepository;
 use CouponBundle\Entity\Code;
 use CouponBundle\Repository\CodeRepository;
 use CouponBundle\Repository\CouponRepository;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
 use Tourze\JsonRPC\Core\Attribute\MethodParam;
@@ -34,13 +34,13 @@ class GetCouponCodesByBizUserId extends CacheableProcedure
     public function __construct(
         private readonly CouponRepository $couponRepository,
         private readonly CodeRepository $codeRepository,
-        private readonly BizUserRepository $bizUserRepository,
+        private readonly UserLoaderInterface $userLoader,
     ) {
     }
 
     public function execute(): array
     {
-        $user = $this->bizUserRepository->find($this->userId);
+        $user = $this->userLoader->loadUserByIdentifier($this->userId);
         if (empty($user)) {
             throw new ApiException('暂无记录');
         }

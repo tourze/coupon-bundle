@@ -2,13 +2,13 @@
 
 namespace CouponBundle\Procedure\Coupon;
 
-use AppBundle\Repository\BizUserRepository;
 use Carbon\Carbon;
 use CouponBundle\Exception\CouponRequirementException;
 use CouponBundle\Exception\PickCodeNotFoundException;
-use CouponBundle\Repository\CodeRepository;
 use CouponBundle\Repository\CouponRepository;
 use CouponBundle\Service\CouponService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
 use Tourze\JsonRPC\Core\Attribute\MethodParam;
@@ -16,7 +16,6 @@ use Tourze\JsonRPC\Core\Attribute\MethodTag;
 use Tourze\JsonRPC\Core\Exception\ApiException;
 use Tourze\JsonRPCLockBundle\Procedure\LockableProcedure;
 use Tourze\JsonRPCLogBundle\Attribute\Log;
-use Doctrine\ORM\EntityManagerInterface;
 
 #[MethodDoc('领取优惠券')]
 #[MethodTag('优惠券模块')]
@@ -32,16 +31,15 @@ class SendCouponCodeToBizUser extends LockableProcedure
 
     public function __construct(
         private readonly CouponRepository $couponRepository,
-        private readonly CodeRepository $codeRepository,
         private readonly CouponService $codeService,
-        private readonly BizUserRepository $bizUserRepository,
+        private readonly UserLoaderInterface $userLoader,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
     public function execute(): array
     {
-        $user = $this->bizUserRepository->find($this->userId);
+        $user = $this->userLoader->loadUserByIdentifier($this->userId);
         if (empty($user)) {
             throw new ApiException('暂无记录');
         }
