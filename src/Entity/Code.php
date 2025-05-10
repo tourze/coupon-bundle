@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\Arrayable\AdminArrayInterface;
 use Tourze\Arrayable\ApiArrayInterface;
+use Tourze\CouponContracts\CodeInterface;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
@@ -37,7 +38,7 @@ use Yiisoft\Json\Json;
 #[Exportable]
 #[ORM\Entity(repositoryClass: CodeRepository::class)]
 #[ORM\Table(name: 'coupon_code', options: ['comment' => '券码'])]
-class Code implements \Stringable, AdminArrayInterface, ApiArrayInterface
+class Code implements \Stringable, AdminArrayInterface, ApiArrayInterface, CodeInterface
 {
     #[Filterable]
     #[IndexColumn]

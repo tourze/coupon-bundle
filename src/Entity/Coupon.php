@@ -4,7 +4,6 @@ namespace CouponBundle\Entity;
 
 use AntdCpBundle\Builder\Field\DynamicFieldSet;
 use AntdCpBundle\Service\FormFieldBuilder;
-use AppBundle\Model\CouponEntity;
 use BenefitBundle\Model\BenefitResource;
 use CouponBundle\Enum\CouponType;
 use CouponBundle\Repository\CouponRepository;
@@ -17,6 +16,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\Arrayable\AdminArrayInterface;
 use Tourze\Arrayable\ApiArrayInterface;
+use Tourze\CouponContracts\CouponInterface;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
@@ -52,7 +52,7 @@ use Yiisoft\Arrays\ArrayHelper;
 #[Creatable]
 #[ORM\Entity(repositoryClass: CouponRepository::class)]
 #[ORM\Table(name: 'coupon_main', options: ['comment' => '优惠券'])]
-class Coupon implements \Stringable, Itemable, AdminArrayInterface, ApiArrayInterface, BenefitResource, ResourceIdentity, CouponEntity
+class Coupon implements \Stringable, Itemable, AdminArrayInterface, ApiArrayInterface, BenefitResource, ResourceIdentity, CouponInterface
 {
     #[Filterable]
     #[IndexColumn]
