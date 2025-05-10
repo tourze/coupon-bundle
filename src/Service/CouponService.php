@@ -2,7 +2,6 @@
 
 namespace CouponBundle\Service;
 
-use AppBundle\Entity\BizUser;
 use Carbon\Carbon;
 use CouponBundle\Entity\Code;
 use CouponBundle\Entity\Coupon;
@@ -122,7 +121,7 @@ class CouponService
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function pickCode(BizUser $user, Coupon $coupon, bool $renewable = true): ?Code
+    public function pickCode(UserInterface $user, Coupon $coupon, bool $renewable = true): ?Code
     {
         // 判断领取条件是否满足
         $this->checkCouponRequirement($user, $coupon);
@@ -154,7 +153,7 @@ class CouponService
     }
 
     // 查找是否满足领取条件
-    public function checkCouponRequirement(BizUser $user, Coupon $coupon): bool
+    public function checkCouponRequirement(UserInterface $user, Coupon $coupon): bool
     {
         foreach ($coupon->getRequirements() as $requirement) {
             if (RequirementType::REG_DAY_LT === $requirement->getType()) {
@@ -191,7 +190,7 @@ class CouponService
     /**
      * 发送优惠券
      */
-    public function sendCode(BizUser|UserInterface $user, Coupon $coupon, string $extend = ''): Code
+    public function sendCode(UserInterface $user, Coupon $coupon, string $extend = ''): Code
     {
         $event = new SendCodeEvent();
         $event->setUser($user);
@@ -214,7 +213,7 @@ class CouponService
      *
      * @throws CodeNotFoundException
      */
-    public function getCodeDetail(BizUser|UserInterface $user, string $sn): Code
+    public function getCodeDetail(UserInterface $user, string $sn): Code
     {
         $code = $this->codeRepository->findOneBy([
             'owner' => $user,
