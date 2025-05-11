@@ -61,7 +61,7 @@ class GetCouponCodesByBizUserId extends CacheableProcedure
         return $this->fetchList($qb, $this->formatItem(...));
     }
 
-    protected function getCacheKey(JsonRpcRequest $request): string
+    public function getCacheKey(JsonRpcRequest $request): string
     {
         $key = static::buildParamCacheKey($request->getParams());
         if ($request->getParams()->get('userId')) {
@@ -71,12 +71,12 @@ class GetCouponCodesByBizUserId extends CacheableProcedure
         return $key;
     }
 
-    protected function getCacheDuration(JsonRpcRequest $request): int
+    public function getCacheDuration(JsonRpcRequest $request): int
     {
         return 60;
     }
 
-    protected function getCacheTags(JsonRpcRequest $request): iterable
+    public function getCacheTags(JsonRpcRequest $request): iterable
     {
         yield null;
     }

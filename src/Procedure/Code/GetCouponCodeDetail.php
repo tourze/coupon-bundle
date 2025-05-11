@@ -47,7 +47,7 @@ class GetCouponCodeDetail extends CacheableProcedure
         return $this->normalizer->normalize($code, 'array', ['groups' => 'restful_read']);
     }
 
-    protected function getCacheKey(JsonRpcRequest $request): string
+    public function getCacheKey(JsonRpcRequest $request): string
     {
         $key = static::buildParamCacheKey($request->getParams());
         if ($this->security->getUser()) {
@@ -57,12 +57,12 @@ class GetCouponCodeDetail extends CacheableProcedure
         return $key;
     }
 
-    protected function getCacheDuration(JsonRpcRequest $request): int
+    public function getCacheDuration(JsonRpcRequest $request): int
     {
         return 60;
     }
 
-    protected function getCacheTags(JsonRpcRequest $request): iterable
+    public function getCacheTags(JsonRpcRequest $request): iterable
     {
         yield CacheHelper::getClassTags(Code::class, $request->getParams()->get('codeId'));
         yield CacheHelper::getClassTags(Channel::class, $request->getParams()->get('codeId'));
