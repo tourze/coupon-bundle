@@ -2,12 +2,9 @@
 
 namespace CouponBundle\Entity;
 
-use AntdCpBundle\Builder\Field\DynamicFieldSet;
-use AntdCpBundle\Service\FormFieldBuilder;
 use BenefitBundle\Model\BenefitResource;
 use CouponBundle\Enum\CouponType;
 use CouponBundle\Repository\CouponRepository;
-use CouponBundle\Repository\WechatMiniProgramConfigRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -33,9 +30,6 @@ use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
 use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
 use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 use Tourze\EasyAdmin\Attribute\Column\PictureColumn;
-use Tourze\EasyAdmin\Attribute\Event\BeforeCreate;
-use Tourze\EasyAdmin\Attribute\Event\BeforeEdit;
-use Tourze\EasyAdmin\Attribute\Event\OnLinkage;
 use Tourze\EasyAdmin\Attribute\Field\FormField;
 use Tourze\EasyAdmin\Attribute\Field\ImagePickerField;
 use Tourze\EasyAdmin\Attribute\Field\LinkageField;
@@ -44,7 +38,6 @@ use Tourze\EasyAdmin\Attribute\Filter\Keyword;
 use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EnumExtra\Itemable;
 use Tourze\ResourceManageBundle\Model\ResourceIdentity;
-use Yiisoft\Arrays\ArrayHelper;
 
 #[AsPermission(title: '优惠券')]
 #[Deletable]
@@ -176,8 +169,6 @@ class Coupon implements \Stringable, Itemable, AdminArrayInterface, ApiArrayInte
     private ?string $backImg = null;
 
     /**
-     * @DynamicFieldSet()
-     *
      * @var Collection<Requirement>
      */
     #[FormField(title: '领取条件')]
@@ -187,8 +178,6 @@ class Coupon implements \Stringable, Itemable, AdminArrayInterface, ApiArrayInte
     /**
      * TODO 有一个值得关注的问题，就是如果在优惠券发送过程中修改了这个使用条件，旧的优惠券怎么处理.
      *
-     * @DynamicFieldSet()
-     *
      * @var Collection<Satisfy>
      */
     #[Groups(['restful_read'])]
@@ -197,8 +186,6 @@ class Coupon implements \Stringable, Itemable, AdminArrayInterface, ApiArrayInte
     private Collection $satisfies;
 
     /**
-     * @DynamicFieldSet()
-     *
      * @var Collection<Discount>
      */
     #[FormField(title: '优惠信息')]
@@ -243,21 +230,16 @@ class Coupon implements \Stringable, Itemable, AdminArrayInterface, ApiArrayInte
     /**
      * @var Collection<Attribute>
      */
-    /**
-     * @DynamicFieldSet()
-     *
-     * @var Collection<Requirement>
-     */
     #[FormField(title: '属性')]
     #[Groups(['restful_read'])]
-    #[ORM\OneToMany(mappedBy: 'coupon', targetEntity: Attribute::class, cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true, indexBy: 'name')]
+    #[ORM\OneToMany(targetEntity: Attribute::class, mappedBy: 'coupon', cascade: ['persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true, indexBy: 'name')]
     private Collection $attributes;
 
     #[FormField]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '使用说明'])]
     private ?string $useDesc = null;
 
-    #[ORM\OneToMany(mappedBy: 'coupon', targetEntity: CouponChannel::class)]
+    #[ORM\OneToMany(targetEntity: CouponChannel::class, mappedBy: 'coupon')]
     private Collection $couponChannels;
 
     #[FormField(title: '渠道')]
@@ -358,104 +340,6 @@ class Coupon implements \Stringable, Itemable, AdminArrayInterface, ApiArrayInte
         $this->valid = $valid;
 
         return $this;
-    }
-
-    #[OnLinkage]
-    public function onTypeChange(array $form, array $record, CouponRepository $couponRepository, FormFieldBuilder $formFieldBuilder): array
-    {
-        $type = ArrayHelper::getValue($form['type'], 'value');
-        if (!$type) {
-            return [];
-        }
-
-        if ($type === CouponType::WEAPP_LINK->value) {
-            $config = $this->getWechatMiniProgramConfig();
-            if (!$config) {
-                $config = new WechatMiniProgramConfig();
-            }
-
-            $fields = $formFieldBuilder->createFromReflectionClass(new \ReflectionClass(WechatMiniProgramConfig::class), $config);
-            foreach ($fields as $field) {
-                switch ($field->getId()) {
-                    case 'appId':
-                        $field->setValue($config->getAppId());
-                        break;
-                    case 'envVersion':
-                        $field->setValue($config->getEnvVersion());
-                        break;
-                    case 'path':
-                        $field->setValue($config->getPath());
-                        break;
-                }
-            }
-            //            $fields[0]->setValue($config->getAppId());
-            //            $fields[1]->setValue($config->getPath());
-            //            $fields[2]->setValue($config->getEnvVersion());
-
-            return $fields;
-        }
-
-        if ($type === CouponType::H5_LINK->value) {
-            $config = $this->getH5Link();
-            if (!$config) {
-                $config = new H5Link();
-            }
-
-            $fields = $formFieldBuilder->createFromReflectionClass(new \ReflectionClass(H5Link::class), $config);
-            $fields[0]->setValue($config->getUrl());
-
-            return $fields;
-        }
-
-        if ($type === CouponType::COMMAND->value) {
-            $config = $this->getCommandConfig();
-            if (!$config) {
-                $config = new CommandConfig();
-            }
-
-            $fields = $formFieldBuilder->createFromReflectionClass(new \ReflectionClass(CommandConfig::class), $config);
-            $fields[0]->setValue($config->getCommand());
-
-            return $fields;
-        }
-
-        return [];
-    }
-
-    #[BeforeCreate]
-    #[BeforeEdit]
-    public function beforeCurdSave(array $form, WechatMiniProgramConfigRepository $configRepository): void
-    {
-        if (CouponType::WEAPP_LINK === $this->getType()) {
-            $config = $this->getWechatMiniProgramConfig();
-            if (!$config) {
-                $config = new WechatMiniProgramConfig();
-            }
-
-            $config->setAppId($form['appId']);
-            $config->setPath($form['path']);
-            $config->setEnvVersion($form['envVersion']);
-            $this->setWechatMiniProgramConfig($config);
-        } else {
-            if ($this->getWechatMiniProgramConfig()) {
-                $this->getWechatMiniProgramConfig()->setAppId('');
-                $this->getWechatMiniProgramConfig()->setPath('');
-                $this->getWechatMiniProgramConfig()->setEnvVersion('');
-            }
-        }
-        if (CouponType::COMMAND === $this->getType()) {
-            $commandConfig = $this->getCommandConfig();
-            if (!$commandConfig) {
-                $commandConfig = new CommandConfig();
-            }
-
-            $commandConfig->setCommand($form['command']);
-            $this->setCommandConfig($commandConfig);
-        } else {
-            if ($this->getCommandConfig()) {
-                $this->getCommandConfig()->setCommand('');
-            }
-        }
     }
 
     public function getId(): ?int

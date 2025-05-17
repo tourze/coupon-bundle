@@ -4,7 +4,6 @@ namespace CouponBundle\Entity;
 
 use Carbon\Carbon;
 use CouponBundle\Enum\CodeStatus;
-use CouponBundle\Procedure\Coupon\AdminGenerateCouponCode;
 use CouponBundle\Repository\CodeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -23,7 +22,6 @@ use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
 use Tourze\EasyAdmin\Attribute\Action\Creatable;
 use Tourze\EasyAdmin\Attribute\Action\Deletable;
 use Tourze\EasyAdmin\Attribute\Action\Exportable;
-use Tourze\EasyAdmin\Attribute\Action\HeaderAction;
 use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
 use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
 use Tourze\EasyAdmin\Attribute\Column\ListColumn;
@@ -311,34 +309,6 @@ class Code implements \Stringable, AdminArrayInterface, ApiArrayInterface, CodeI
         $this->sn = $sn;
 
         return $this;
-    }
-
-    #[HeaderAction(title: '生成券码')]
-    #[AsPermission(title: '生成券码')]
-    public function renderGenerateButton(FormFieldBuilder $fieldHelper): ModalFormAction
-    {
-        return ModalFormAction::gen()
-            ->setFormTitle('生成券码')
-            ->setLabel('生成券码')
-            ->setFormFields([
-                $fieldHelper->createSelectFromEntityClass(Coupon::class)
-                    ->setId('couponId')
-                    ->setLabel('优惠券'),
-                InputNumberField::gen()
-                    ->setId('quantity')
-                    ->setLabel('数量')
-                    ->setInputProps([
-                        'style' => [
-                            'width' => '100%',
-                        ],
-                    ]),
-            ])
-            ->setCallback(function (array $form, array $record, AdminGenerateCouponCode $generateApi) {
-                $generateApi->id = $form['couponId'];
-                $generateApi->quantity = $form['quantity'];
-
-                return $generateApi->execute();
-            });
     }
 
     public function getGatherChannel(): ?string
