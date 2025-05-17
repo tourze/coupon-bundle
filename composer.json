@@ -67,5 +67,10 @@
     "psr-4": {
       "CouponBundle\\": "src"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CouponBundle\\Tests\\": "tests"
+    }
   }
 }
