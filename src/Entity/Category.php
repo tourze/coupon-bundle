@@ -2,8 +2,6 @@
 
 namespace CouponBundle\Entity;
 
-use AntdCpBundle\Builder\Field\BraftEditor;
-use App\Kernel;
 use CouponBundle\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -153,9 +151,6 @@ class Category implements \Stringable, Itemable, AdminArrayInterface
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => 'LOGO地址'])]
     private ?string $logoUrl = null;
 
-    /**
-     * @BraftEditor
-     */
     #[RichTextField]
     #[FormField]
     #[Groups(['restful_read'])]
@@ -168,7 +163,7 @@ class Category implements \Stringable, Itemable, AdminArrayInterface
      * @var Collection<Category>
      */
     #[Groups(['api_tree'])]
-    #[ORM\OneToMany(mappedBy: 'parent', targetEntity: Category::class)]
+    #[ORM\OneToMany(targetEntity: Category::class, mappedBy: 'parent')]
     private Collection $children;
 
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '备注'])]
@@ -181,7 +176,7 @@ class Category implements \Stringable, Itemable, AdminArrayInterface
     private ?array $showTags = [];
 
     #[Ignore]
-    #[ORM\OneToMany(mappedBy: 'category', targetEntity: Coupon::class)]
+    #[ORM\OneToMany(targetEntity: Coupon::class, mappedBy: 'category')]
     private Collection $coupons;
 
     #[FormField]
@@ -359,88 +354,6 @@ class Category implements \Stringable, Itemable, AdminArrayInterface
         $this->showTags = $showTags;
 
         return $this;
-    }
-
-    /**
-     * @deprecated 兼容旧的写法，直接在这里返回所有数据
-     */
-    public static function genOptions(): array
-    {
-        $repo = Kernel::container()->get(CategoryRepository::class);
-        $entities = $repo->findBy(['valid' => true]);
-
-        $result = [];
-        foreach ($entities as $entity) {
-            $tmp = [];
-            $tmp['text'] = $entity->getTitle();
-            $tmp['label'] = $entity->getTitle();
-            $tmp['value'] = $entity->getId();
-            $result[] = $tmp;
-        }
-
-        return $result;
-    }
-
-    public function getCategoryChildren(bool $is_only_enabled = false): array
-    {
-        $result = [
-            'title' => $this->getTitle(),
-            'value' => $this->getId(),
-            'key' => $this->getId(),
-
-            'id' => $this->getId(),
-            'name' => $this->getTitle(),
-        ];
-
-        // 查下一层
-        $categories = $this->getChildren();
-        if ($categories->count() > 0) {
-            $result['children'] = [];
-            foreach ($categories as $category) {
-                // 如果只查询启用的分类，当前这个分类没有启用的话它的子目录也就不需要再查了
-                if ($is_only_enabled && !$category->isValid()) {
-                    continue;
-                }
-
-                $result['children'][] = $category->getCategoryChildren();
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * 获取可以用来搜索的分类ID
-     */
-    public function getSearchableId(): array
-    {
-        $result = [$this->getId()];
-        foreach ($this->getChildren() as $child) {
-            $result = array_merge($result, $child->getSearchableId());
-        }
-
-        return array_values(array_unique($result));
-    }
-
-    /**
-     * @deprecated 兼容旧的写法，直接在这里返回所有数据
-     */
-    public static function genTreeData(): array
-    {
-        $repo = Kernel::container()->get(CategoryRepository::class);
-
-        // 第一层
-        $entities = $repo->findBy([
-            'parent' => null,
-            'valid' => true,
-        ]);
-
-        $treeData = [];
-        foreach ($entities as $level1Model) {
-            $treeData[] = $level1Model->getCategoryChildren(true);
-        }
-
-        return $treeData;
     }
 
     public function getNestTitle(): string
